@@ -68,22 +68,28 @@ class MovieListViewModel @Inject constructor(
 //            }
         },
         onSuccess = { items, newKey, isEndReached ->
-            _upcomingMovieListState.update { currentState ->
-                currentState.copy(
-                    upcomingMovieList = currentState.upcomingMovieList + items as List<Movie>,
-                    page = newKey,
-                    endReached = isEndReached
-                )
-            }
+            getUpcomingMovies()
+//            _upcomingMovieListState.update { currentState ->
+//                currentState.copy(
+//                    upcomingMovieList = currentState.upcomingMovieList + items as List<Movie>,
+//                    page = newKey,
+//                    endReached = isEndReached
+//                )
+//            }
         }
     )
 
     init {
+        getUpcomingMovies()
+    }
+
+    fun loadNextUpcomingMovies() {
+        //time to load next items
         with(connectionObserver) {
             onConnected = {
-                _upcomingMovieListState.value =
-                    _upcomingMovieListState.value.copy(hasInternet = true)
-
+                viewModelScope.launch {
+                    paginator.loadNextItems()
+                }
             }
             onDisconnected = {
                 _upcomingMovieListState.value = _upcomingMovieListState.value.copy(
@@ -94,15 +100,6 @@ class MovieListViewModel @Inject constructor(
             }
             register()
         }
-        getUpcomingMovies()
-    }
-
-    fun loadNextUpcomingMovies() {
-        viewModelScope.launch {
-            //time to load next items
-            delay(1000L)
-            paginator.loadNextItems()
-        }
     }
 
     fun getUpcomingMovies() {
@@ -111,7 +108,7 @@ class MovieListViewModel @Inject constructor(
             .onEach { result ->
                 if (result.isNotEmpty()) {
                     _upcomingMovieListState.value = MovieListState(upcomingMovieList = result)
-                }else{
+                } else {
                     loadNextUpcomingMovies()
                 }
             }
@@ -121,7 +118,7 @@ class MovieListViewModel @Inject constructor(
 
     fun cachedPagingMetadata() {
         _upcomingMovieListState.value =
-            _upcomingMovieListState.value.copy(page = getCachedPagingMetadataUseCase()?.page?:0)
+            _upcomingMovieListState.value.copy(page = getCachedPagingMetadataUseCase()?.page ?: 0)
     }
 
     private val _popularMovieListState = MutableStateFlow(MovieListState())
