@@ -5,7 +5,8 @@ import com.akpdev.movies.common.PaginatedList
 import com.akpdev.movies.data.dto.toMovie
 import com.akpdev.movies.data.dto.toPaginatedList
 import com.akpdev.movies.data.localDataSource.dao.MovieDao
-import com.akpdev.movies.data.localDataSource.entity.PagingMetaDataEntity
+import com.akpdev.movies.data.localDataSource.entity.PopularPagingMetaDataEntity
+import com.akpdev.movies.data.localDataSource.entity.UpcomingPagingMetaDataEntity
 import com.akpdev.movies.data.remote.api.MoviedbApi
 import com.akpdev.movies.domain.model.Movie
 import com.akpdev.movies.domain.model.toMovie
@@ -27,11 +28,11 @@ class MovieRepositoryImpl @Inject constructor(
         page: Int,
     ): Result<PaginatedList<Movie>> {
         return try {
-            val movieList = moviedbApi.getUpcomingMovies(page).body()?.toPaginatedList()
+            val movieList = moviedbApi.getUpcomingMovies(page).body()?.toPaginatedList(type = "upcoming")
             movieDao.upsertAll(
                 movieList?.data?.mapIndexed { index, movie -> movie.toMovieEntity() }?.toSet()?.toList().orEmpty()
             )
-            movieDao.insertPagingMetaData(PagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
+            movieDao.insertUpcomingPagingMetaData(UpcomingPagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
             Result.success(movieList ?: PaginatedList<Movie>(emptyList(), 0, 0))
         } catch (e: HttpException) {
             Result.failure(exception = e)
@@ -40,29 +41,51 @@ class MovieRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getCachedPagingMetadata(): PagingMetaData? {
-        return movieDao.getPagingMetaData()?.toPagingData()
+    override fun getCachedUpcomingPagingMetadata(): PagingMetaData? {
+        return movieDao.getUpcomingPagingMetaDataEntity()?.toPagingData()
     }
 
-    override suspend fun getPopularMovieList(page: Int): List<Movie> {
-        return moviedbApi.getPopularMovies(page).body()?.results?.map { it.toMovie() }.orEmpty()
+    override fun getCachedPopularPagingMetadata(): PagingMetaData? {
+        return movieDao.getPopularPagingMetaDataEntity()?.toPagingData()
     }
 
-    override suspend fun addToFavoriteMovies(movie: Movie): Result<Boolean> {
-        TODO("Not yet implemented")
+    override suspend fun getPopularMovieList(page: Int):Result<PaginatedList<Movie>> {
+        return try {
+            val movieList = moviedbApi.getPopularMovies(page).body()?.toPaginatedList(type = "popular")
+            movieDao.upsertAll(
+                movieList?.data?.mapIndexed { index, movie -> movie.toMovieEntity() }?.toSet()?.toList().orEmpty()
+            )
+            movieDao.insertPopularPagingMetaData(PopularPagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
+            Result.success(movieList ?: PaginatedList<Movie>(emptyList(), 0, 0))
+        } catch (e: HttpException) {
+            Result.failure(exception = e)
+        } catch (e: IOException) {
+            Result.failure(exception = e)
+        }
+    }
+
+    override  fun toggleFavoriteMovie(movieId:String,isFavorite:Boolean): Result<Boolean> {
+        return try {
+            movieDao.toggleFavorite(movieId, favorite = isFavorite )
+            Result.success(isFavorite)
+        }catch (e:Exception){
+            Result.failure(e)
+        }
     }
 
     override fun fetchUpcomingMoviesFromRoom(): Flow<List<Movie>> {
-        val moviesFromRoom = movieDao.getAllMovies()
+        val moviesFromRoom = movieDao.getMovies("upcoming")
         return  moviesFromRoom.map {it.map { it.toMovie() }}
 
     }
 
-    override suspend fun fetchPopularMoviesFromRoom(): List<Movie> {
-        TODO("Not yet implemented")
+    override fun fetchPopularMoviesFromRoom(): Flow<List<Movie>> {
+        val moviesFromRoom = movieDao.getMovies("popular")
+        return  moviesFromRoom.map {it.map { it.toMovie() }}
     }
 
-    override suspend fun fetchFavoriteMoviesFromRoom(): List<Movie> {
-        TODO("Not yet implemented")
+    override fun fetchFavoriteMoviesFromRoom(): List<Movie> {
+        return movieDao.getFavoriteMovies(favorite = true).map { it.toMovie() }.distinctBy { it.id }
     }
+
 }

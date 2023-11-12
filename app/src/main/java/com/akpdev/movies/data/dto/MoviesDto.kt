@@ -19,21 +19,23 @@ data class MovieResponse(
     val totalPages:Int?
 )
 
-fun MovieResponse.toPaginatedList():PaginatedList<Movie>{
+fun MovieResponse.toPaginatedList(type:String):PaginatedList<Movie>{
     return PaginatedList<Movie>(
-        data = results.map { it.toMovie() },
+        data = results.map { it.toMovie(type) },
         page =  page,
         totalPage = totalPages ?: 0
     )
 }
 
-fun MoviesDto.toMovie():Movie{
+fun MoviesDto.toMovie(type:String):Movie{
     return Movie(
         id = id.orEmpty(),
         title = title.orEmpty(),
         posterPath = posterPath.orEmpty(),
         overview = overview.orEmpty(),
-        itemOrder = 0
+        itemOrder = 0,
+        isFavorite = false,
+        movieType = type
     )
 }
 

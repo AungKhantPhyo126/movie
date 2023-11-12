@@ -1,10 +1,10 @@
-package com.akpdev.movies.domain.useCase
+package com.akpdev.movies.domain.useCase.fetchFromRoom
 
 import com.akpdev.movies.domain.model.Movie
 import com.akpdev.movies.domain.repository.MovieRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
-typealias ErrorMessage = String
+
 class GeUpcomingMoviesUseCase @Inject constructor(
     private val movieRepository: MovieRepository
 ) {

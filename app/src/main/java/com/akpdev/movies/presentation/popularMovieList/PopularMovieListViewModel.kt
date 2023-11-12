@@ -1,4 +1,4 @@
-package com.akpdev.movies.presentation.movieList
+package com.akpdev.movies.presentation.popularMovieList
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -7,11 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.akpdev.movies.common.ConnectionObserver
 import com.akpdev.movies.common.ConnectivityLiveData
 import com.akpdev.movies.common.DefaultPaginator
-import com.akpdev.movies.common.Resource
-import com.akpdev.movies.domain.useCase.FetchUpcomingMoviesUseCase
-import com.akpdev.movies.domain.useCase.GeUpcomingMoviesUseCase
-import com.akpdev.movies.domain.useCase.GetCachedPagingMetadataUseCase
-import com.akpdev.movies.domain.useCase.GetPopularMoviesUseCase
+import com.akpdev.movies.domain.useCase.fetchFromNetworkUseCase.FetchPopularMovieUseCase
+import com.akpdev.movies.domain.useCase.GetCachedPopularPagingMetadataUseCase
+import com.akpdev.movies.domain.useCase.fetchFromRoom.GetPopularMoviesUseCase
+import com.akpdev.movies.domain.useCase.ToggleFavoriteMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,11 +23,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MovieListViewModel @Inject constructor(
-    private val getUpcomingMoviesUseCase: GeUpcomingMoviesUseCase,
-    private val fetchUpcomingMoviesUseCase: FetchUpcomingMoviesUseCase,
-    private val getCachedPagingMetadataUseCase: GetCachedPagingMetadataUseCase,
+class  PopularMovieListViewModel @Inject constructor(
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase,
+    private val fetchPopularMovieUseCase: FetchPopularMovieUseCase,
+    private val getCachedPopularPagingMetadataUseCase: GetCachedPopularPagingMetadataUseCase,
+    private val toggleFavoriteMovieUseCase: ToggleFavoriteMovieUseCase,
     private val connectionObserver: ConnectionObserver,
     application: Application
 ) : AndroidViewModel(application) {
@@ -43,18 +42,18 @@ class MovieListViewModel @Inject constructor(
     }
 
 
-    private val _upcomingMovieListState = MutableStateFlow(MovieListState())
-    val upcomingMovieListState = _upcomingMovieListState.asStateFlow()
+    private val _popularMovieListState = MutableStateFlow(PopularMovieListState())
+    val movieListState = _popularMovieListState.asStateFlow()
 
     private val paginator = DefaultPaginator(
         initialKey = cachedPageNumber(),
         onLoadUpdated = {
-            _upcomingMovieListState.update { currentState ->
+            _popularMovieListState.update { currentState ->
                 currentState.copy(isLoading = it)
             }
         },
         onRequest = { nextPage ->
-            fetchUpcomingMoviesUseCase(nextPage)
+            fetchPopularMovieUseCase(nextPage)
         },
         getNextKey = { paginatedList ->
             paginatedList.page + 1
@@ -66,19 +65,12 @@ class MovieListViewModel @Inject constructor(
 //            }
         },
         onSuccess = { items, newKey, isEndReached ->
-            getUpcomingMovies()
-//            _upcomingMovieListState.update { currentState ->
-//                currentState.copy(
-//                    upcomingMovieList = currentState.upcomingMovieList + items as List<Movie>,
-//                    page = newKey,
-//                    endReached = isEndReached
-//                )
-//            }
+            getPopularMovies()
         }
     )
 
     init {
-        getUpcomingMovies()
+        getPopularMovies()
     }
 
     fun loadNextUpcomingMovies() {
@@ -90,7 +82,7 @@ class MovieListViewModel @Inject constructor(
                 }
             }
             onDisconnected = {
-                _upcomingMovieListState.value = _upcomingMovieListState.value.copy(
+                _popularMovieListState.value = _popularMovieListState.value.copy(
                     isLoading = false,
                     error = "No Internet!",
                     hasInternet = false
@@ -100,12 +92,12 @@ class MovieListViewModel @Inject constructor(
         }
     }
 
-    fun getUpcomingMovies() {
+    fun getPopularMovies() {
         cachedPageNumber()
-        getUpcomingMoviesUseCase.invoke()
+        getPopularMoviesUseCase.invoke()
             .onEach { result ->
                 if (result.isNotEmpty()) {
-                    _upcomingMovieListState.value = MovieListState(upcomingMovieList = result)
+                    _popularMovieListState.value = PopularMovieListState(popularMovieList = result)
                 } else {
                     loadNextUpcomingMovies()
                 }
@@ -114,31 +106,12 @@ class MovieListViewModel @Inject constructor(
     }
 
 
-    fun cachedPageNumber(): Int = getCachedPagingMetadataUseCase()?.page ?: 0
+    fun cachedPageNumber(): Int = getCachedPopularPagingMetadataUseCase()?.page ?: 0
 
 
-    private val _popularMovieListState = MutableStateFlow(MovieListState())
-    val popularMovieListState = _popularMovieListState.asStateFlow()
 
-    fun getPopularMovies() {
-        getPopularMoviesUseCase(0).onEach { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    _popularMovieListState.value = MovieListState(isLoading = true)
-                }
-
-                is Resource.Success -> {
-                    _popularMovieListState.value =
-                        MovieListState(popularMovieList = result.data ?: emptyList())
-                }
-
-                is Resource.Error -> {
-                    _popularMovieListState.update { currentUiState ->
-                        currentUiState.copy(error = result.message ?: "Unknown Error Occurred")
-                    }
-                }
-            }
-        }.launchIn(viewModelScope)
+    fun toggleFavorite(id:String,isFavorite:Boolean){
+        toggleFavoriteMovieUseCase(id,isFavorite)
     }
 
     override fun onCleared() {

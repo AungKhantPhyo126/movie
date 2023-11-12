@@ -6,10 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.akpdev.movies.data.localDataSource.dao.MovieDao
 import com.akpdev.movies.data.localDataSource.entity.MovieEntity
-import com.akpdev.movies.data.localDataSource.entity.PagingMetaDataEntity
+import com.akpdev.movies.data.localDataSource.entity.PopularPagingMetaDataEntity
+import com.akpdev.movies.data.localDataSource.entity.UpcomingPagingMetaDataEntity
 
 @Database(
-    entities = [MovieEntity::class,PagingMetaDataEntity::class],
+    entities = [MovieEntity::class, UpcomingPagingMetaDataEntity::class , PopularPagingMetaDataEntity::class],
     version = 1,
     exportSchema = false
 )

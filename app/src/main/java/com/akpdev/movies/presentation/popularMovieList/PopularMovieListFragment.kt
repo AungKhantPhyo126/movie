@@ -1,4 +1,4 @@
-package com.akpdev.movies.presentation.movieList
+package com.akpdev.movies.presentation.popularMovieList
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,65 +8,66 @@ import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
-import androidx.recyclerview.widget.RecyclerView.Recycler
-import com.akpdev.movies.R
-import com.akpdev.movies.common.Constants.QUERY_PAGE_SIZE
-import com.akpdev.movies.databinding.FragmentMovieListBinding
+import com.akpdev.movies.databinding.FragmentPopularMovieListBinding
+import com.akpdev.movies.presentation.model.asUiModel
+import com.akpdev.movies.presentation.upcomingMovieList.MoviesListRecyclerAdapter
+import com.akpdev.movies.presentation.upcomingMovieList.UpcomingMovieListFragmentDirections
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class MovieListFragment : Fragment() {
-    private var _binding: FragmentMovieListBinding? = null
-    val binding: FragmentMovieListBinding
+class PopularMovieListFragment:Fragment() {
+    private var _binding:FragmentPopularMovieListBinding?=null
+    val binding:FragmentPopularMovieListBinding
         get() = _binding!!
-
-    private val viewModel by viewModels<MovieListViewModel>()
+    private val viewModel by viewModels<PopularMovieListViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return FragmentMovieListBinding.inflate(inflater).also {
+        return FragmentPopularMovieListBinding.inflate(inflater).also {
             _binding = it
         }.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _binding=null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val adapter = MoviesListRecyclerAdapter {
-
-        }
+        val adapter = MoviesListRecyclerAdapter({ movie ->
+            findNavController().navigate(
+                PopularMovieListFragmentDirections.actionPopularMovieListFragmentToMovieDetailFragment(
+                    movie.asUiModel()
+                )
+            )
+        }, { movieId, isFavorite ->
+            viewModel.toggleFavorite(movieId, isFavorite)
+        })
         binding.rvMovie.adapter = adapter
-        binding.rvMovie.addOnScrollListener(this@MovieListFragment.scrollListener)
+        binding.rvMovie.addOnScrollListener(this@PopularMovieListFragment.scrollListener)
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.upcomingMovieListState.collectLatest {
+                viewModel.movieListState.collectLatest {
                     if (it.isLoading) {
                         showLoadingBar()
-                    } else if (it.upcomingMovieList.isNotEmpty()) {
+                    } else if (it.popularMovieList.isNotEmpty()) {
                         hideLoadingBar()
-                        adapter.submitList(it.upcomingMovieList)
+                        adapter.submitList(it.popularMovieList)
                     }else if (it.error.isNotEmpty()) {
                         hideLoadingBar()
                         Toast.makeText(requireContext(), it.error, Toast.LENGTH_LONG).show()
@@ -132,18 +133,6 @@ class MovieListFragment : Fragment() {
                 viewModel.loadNextUpcomingMovies()
                 isLoading = true
             }
-
-//            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
-//            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
-//            val isNotAtBeginning = firstVisibleItemPosition >= 0
-//            val isTotalMoreThanVisible = totalItemCount >= cachedPage * QUERY_PAGE_SIZE
-//            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
-//                    isTotalMoreThanVisible && isScrolling
-//            if (shouldPaginate) {
-//                viewModel.loadNextUpcomingMovies()
-//                isScrolling = false
-//            }
-
         }
     }
 }

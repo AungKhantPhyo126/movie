@@ -29,8 +29,9 @@ class MainActivity : AppCompatActivity() {
     }
     private fun navigateToSelectedScreen(menu:MenuItem):Boolean{
         when(menu.itemId){
-            R.id.movieListFragment->{navController?.navigate(R.id.movieListFragment)}
+            R.id.upcomingMovieListFragment->{navController?.navigate(R.id.upcomingMovieListFragment)}
             R.id.favoriteMoviesFragment->{navController?.navigate(R.id.favoriteMoviesFragment)}
+            R.id.popularMovieListFragment->{navController?.navigate(R.id.popularMovieListFragment)}
         }
         return true
     }

@@ -1,4 +1,4 @@
-package com.akpdev.movies.domain.useCase
+package com.akpdev.movies.domain.useCase.fetchFromNetworkUseCase
 
 import com.akpdev.movies.common.PaginatedList
 import com.akpdev.movies.domain.model.Movie

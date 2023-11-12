@@ -12,5 +12,6 @@ data class MovieEntity(
     val overview:String,
     val isFav:Boolean,
     @PrimaryKey(autoGenerate = true)
-    val itemOrder:Int? = null
+    val itemOrder:Int? = null,
+    val movieType:String
 )

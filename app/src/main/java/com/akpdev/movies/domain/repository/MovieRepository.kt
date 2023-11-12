@@ -7,12 +7,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface MovieRepository {
     suspend fun getUpcomingMovieList(page:Int):Result<PaginatedList<Movie>>
-    fun getCachedPagingMetadata():PagingMetaData?
-    suspend fun getPopularMovieList(page: Int):List<Movie>
+    fun getCachedUpcomingPagingMetadata():PagingMetaData?
+    fun getCachedPopularPagingMetadata():PagingMetaData?
+    suspend fun getPopularMovieList(page: Int):Result<PaginatedList<Movie>>
 
-    suspend fun addToFavoriteMovies(movie: Movie):Result<Boolean>
+    fun toggleFavoriteMovie(movieId: String,isFavorite:Boolean):Result<Boolean>
 
     fun fetchUpcomingMoviesFromRoom():Flow<List<Movie>>
-    suspend fun fetchPopularMoviesFromRoom():List<Movie>
-    suspend fun fetchFavoriteMoviesFromRoom():List<Movie>
+    fun fetchPopularMoviesFromRoom():Flow<List<Movie>>
+    fun fetchFavoriteMoviesFromRoom():List<Movie>
 }
