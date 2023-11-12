@@ -8,14 +8,12 @@ import com.akpdev.movies.common.ConnectionObserver
 import com.akpdev.movies.common.ConnectivityLiveData
 import com.akpdev.movies.common.DefaultPaginator
 import com.akpdev.movies.common.Resource
-import com.akpdev.movies.domain.model.Movie
 import com.akpdev.movies.domain.useCase.FetchUpcomingMoviesUseCase
 import com.akpdev.movies.domain.useCase.GeUpcomingMoviesUseCase
 import com.akpdev.movies.domain.useCase.GetCachedPagingMetadataUseCase
 import com.akpdev.movies.domain.useCase.GetPopularMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -49,7 +47,7 @@ class MovieListViewModel @Inject constructor(
     val upcomingMovieListState = _upcomingMovieListState.asStateFlow()
 
     private val paginator = DefaultPaginator(
-        initialKey = _upcomingMovieListState.value.page,
+        initialKey = cachedPageNumber(),
         onLoadUpdated = {
             _upcomingMovieListState.update { currentState ->
                 currentState.copy(isLoading = it)
@@ -103,7 +101,7 @@ class MovieListViewModel @Inject constructor(
     }
 
     fun getUpcomingMovies() {
-        cachedPagingMetadata()
+        cachedPageNumber()
         getUpcomingMoviesUseCase.invoke()
             .onEach { result ->
                 if (result.isNotEmpty()) {
@@ -116,10 +114,8 @@ class MovieListViewModel @Inject constructor(
     }
 
 
-    fun cachedPagingMetadata() {
-        _upcomingMovieListState.value =
-            _upcomingMovieListState.value.copy(page = getCachedPagingMetadataUseCase()?.page ?: 0)
-    }
+    fun cachedPageNumber(): Int = getCachedPagingMetadataUseCase()?.page ?: 0
+
 
     private val _popularMovieListState = MutableStateFlow(MovieListState())
     val popularMovieListState = _popularMovieListState.asStateFlow()

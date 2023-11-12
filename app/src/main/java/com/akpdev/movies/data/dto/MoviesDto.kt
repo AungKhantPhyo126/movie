@@ -32,7 +32,8 @@ fun MoviesDto.toMovie():Movie{
         id = id.orEmpty(),
         title = title.orEmpty(),
         posterPath = posterPath.orEmpty(),
-        overview = overview.orEmpty()
+        overview = overview.orEmpty(),
+        itemOrder = 0
     )
 }
 

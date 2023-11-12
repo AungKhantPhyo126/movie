@@ -62,9 +62,6 @@ class MovieListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.upcomingMovieListState.collectLatest {
-                    if (it.page>0){
-                        cachedPage = it.page
-                    }
                     if (it.isLoading) {
                         showLoadingBar()
                     } else if (it.upcomingMovieList.isNotEmpty()) {
@@ -73,10 +70,6 @@ class MovieListFragment : Fragment() {
                     }else if (it.error.isNotEmpty()) {
                         hideLoadingBar()
                         Toast.makeText(requireContext(), it.error, Toast.LENGTH_LONG).show()
-                    }else if (it.endReached) {
-                        hideLoadingBar()
-                        isLastPage = true
-                        binding.rvMovie.setPadding(0, 0, 0, 0)
                     }
                 }
             }
@@ -115,11 +108,9 @@ class MovieListFragment : Fragment() {
         binding.loadingProgressBar.isVisible = true
     }
 
-    var cachedPage = 1
 
     var isScrolling = false
     var isLoading = false
-    var isLastPage = false
 
     val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -132,25 +123,27 @@ class MovieListFragment : Fragment() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            val visibleItemCount = layoutManager.childCount
             val totalItemCount = layoutManager.itemCount
+            val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+            val visibleThreshold = 5
 
-            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
-            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
-            val isNotAtBeginning = firstVisibleItemPosition >= 0
-            val isTotalMoreThanVisible = totalItemCount >= cachedPage * QUERY_PAGE_SIZE
-            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
-                    isTotalMoreThanVisible && isScrolling
-            if (shouldPaginate) {
+            if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                // End has been reached, load more data
                 viewModel.loadNextUpcomingMovies()
-                isScrolling = false
+                isLoading = true
             }
 
+//            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
+//            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
+//            val isNotAtBeginning = firstVisibleItemPosition >= 0
+//            val isTotalMoreThanVisible = totalItemCount >= cachedPage * QUERY_PAGE_SIZE
+//            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
+//                    isTotalMoreThanVisible && isScrolling
+//            if (shouldPaginate) {
+//                viewModel.loadNextUpcomingMovies()
+//                isScrolling = false
+//            }
+
         }
-    }
-
-    fun setUpRecyclerView() {
-
     }
 }

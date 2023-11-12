@@ -1,5 +1,6 @@
 package com.akpdev.movies.data.repository
 
+import com.akpdev.movies.common.Constants.QUERY_PAGE_SIZE
 import com.akpdev.movies.common.PaginatedList
 import com.akpdev.movies.data.dto.toMovie
 import com.akpdev.movies.data.dto.toPaginatedList
@@ -28,7 +29,7 @@ class MovieRepositoryImpl @Inject constructor(
         return try {
             val movieList = moviedbApi.getUpcomingMovies(page).body()?.toPaginatedList()
             movieDao.upsertAll(
-                movieList?.data?.map { it.toMovieEntity() }?.toSet()?.toList().orEmpty()
+                movieList?.data?.mapIndexed { index, movie -> movie.toMovieEntity() }?.toSet()?.toList().orEmpty()
             )
             movieDao.insertPagingMetaData(PagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
             Result.success(movieList ?: PaginatedList<Movie>(emptyList(), 0, 0))

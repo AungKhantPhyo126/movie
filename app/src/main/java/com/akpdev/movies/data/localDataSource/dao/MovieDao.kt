@@ -22,7 +22,7 @@ interface MovieDao {
     fun pagingSource():PagingSource<Int,MovieEntity>
 
     @Transaction
-    @Query("SELECT * FROM movies")
+    @Query("SELECT * FROM movies ORDER by itemOrder ASC")
     fun getAllMovies():Flow<List<MovieEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

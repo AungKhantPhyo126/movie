@@ -6,7 +6,8 @@ data class Movie(
     val id:String,
     val title:String,
     val posterPath:String,
-    val overview:String
+    val overview:String,
+    val itemOrder: Int
 )
 
 fun Movie.toMovieEntity(): MovieEntity {
@@ -15,7 +16,8 @@ fun Movie.toMovieEntity(): MovieEntity {
         title = title,
         posterPath = posterPath,
         overview = overview,
-        isFav = false
+        isFav = false,
+        itemOrder = null
     )
 }
 
@@ -24,6 +26,7 @@ fun MovieEntity.toMovie(): Movie {
         id = id.toString(),
         title = title,
         posterPath = posterPath,
-        overview = overview
+        overview = overview,
+        itemOrder =itemOrder?:0
     )
 }
