@@ -1,4 +1,4 @@
-package com.akpdev.movies.di.inteceptors
+package com.akpdev.movies.data.remote.inteceptors
 
 import com.akpdev.movies.common.Constants
 import okhttp3.Interceptor

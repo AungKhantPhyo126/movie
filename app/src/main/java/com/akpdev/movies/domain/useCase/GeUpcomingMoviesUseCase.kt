@@ -1,4 +1,4 @@
-package com.akpdev.movies.domain.useCase.fetchFromRoom
+package com.akpdev.movies.domain.useCase
 
 import com.akpdev.movies.domain.model.Movie
 import com.akpdev.movies.domain.repository.MovieRepository

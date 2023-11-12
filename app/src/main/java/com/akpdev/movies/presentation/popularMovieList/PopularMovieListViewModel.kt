@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.akpdev.movies.common.ConnectionObserver
 import com.akpdev.movies.common.ConnectivityLiveData
 import com.akpdev.movies.common.DefaultPaginator
-import com.akpdev.movies.domain.useCase.fetchFromNetworkUseCase.FetchPopularMovieUseCase
+import com.akpdev.movies.domain.useCase.FetchPopularMovieUseCase
 import com.akpdev.movies.domain.useCase.GetCachedPopularPagingMetadataUseCase
-import com.akpdev.movies.domain.useCase.fetchFromRoom.GetPopularMoviesUseCase
+import com.akpdev.movies.domain.useCase.GetPopularMoviesUseCase
 import com.akpdev.movies.domain.useCase.ToggleFavoriteMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

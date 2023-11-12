@@ -25,8 +25,8 @@
         android:name="com.akpdev.movies.presentation.movieDetail.MovieDetailFragment"
         android:label="MovieDetailFragment" >
         <argument
-            android:name="detailData"
-            app:argType="com.akpdev.movies.presentation.model.MovieUiModel" />
+            android:name="movieId"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/popularMovieListFragment"

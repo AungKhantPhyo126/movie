@@ -48,10 +48,10 @@ class PopularMovieListFragment:Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val adapter = MoviesListRecyclerAdapter({ movie ->
+        val adapter = MoviesListRecyclerAdapter({ movieId ->
             findNavController().navigate(
                 PopularMovieListFragmentDirections.actionPopularMovieListFragmentToMovieDetailFragment(
-                    movie.asUiModel()
+                    movieId
                 )
             )
         }, { movieId, isFavorite ->

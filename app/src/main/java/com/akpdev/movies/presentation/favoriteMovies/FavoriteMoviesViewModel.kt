@@ -1,7 +1,7 @@
 package com.akpdev.movies.presentation.favoriteMovies
 
 import androidx.lifecycle.ViewModel
-import com.akpdev.movies.domain.useCase.fetchFromRoom.GetFavoriteMoviesUseCase
+import com.akpdev.movies.domain.useCase.GetFavoriteMoviesUseCase
 import com.akpdev.movies.domain.useCase.ToggleFavoriteMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

@@ -48,10 +48,10 @@ class UpcomingMovieListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = MoviesListRecyclerAdapter({ movie ->
+        val adapter = MoviesListRecyclerAdapter({ movieId ->
             findNavController().navigate(
                 UpcomingMovieListFragmentDirections.actionMovieListFragmentToMovieDetailFragment(
-                    movie.asUiModel()
+                    movieId
                 )
             )
         }, { movieId, isFavorite ->

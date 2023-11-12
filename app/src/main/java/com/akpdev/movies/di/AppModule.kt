@@ -8,7 +8,7 @@ import com.akpdev.movies.data.localDataSource.MovieDatabase
 import com.akpdev.movies.data.localDataSource.dao.MovieDao
 import com.akpdev.movies.data.remote.api.MoviedbApi
 import com.akpdev.movies.data.repository.MovieRepositoryImpl
-import com.akpdev.movies.di.inteceptors.CommonQueryInterceptor
+import com.akpdev.movies.data.remote.inteceptors.CommonQueryInterceptor
 import com.akpdev.movies.domain.repository.MovieRepository
 import com.google.gson.Gson
 import com.squareup.moshi.Moshi
@@ -69,7 +69,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideCommonQueryInterceptor():CommonQueryInterceptor{
+    fun provideCommonQueryInterceptor(): CommonQueryInterceptor {
         return CommonQueryInterceptor()
     }
 

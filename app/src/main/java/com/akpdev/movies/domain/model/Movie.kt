@@ -12,14 +12,14 @@ data class Movie(
     val movieType:String
 )
 
-fun Movie.toMovieEntity(): MovieEntity {
+fun Movie.toMovieEntity(itemOrder: Int): MovieEntity {
     return MovieEntity(
         id = id.toInt(),
         title = title,
         posterPath = posterPath,
         overview = overview,
         isFav = isFavorite,
-        itemOrder = null,
+        itemOrder = itemOrder,
         movieType = movieType
     )
 }

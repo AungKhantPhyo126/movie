@@ -12,7 +12,7 @@ import com.akpdev.movies.databinding.ItemRecyclerUpcomingMovieBinding
 import com.akpdev.movies.domain.model.Movie
 
 class MoviesListRecyclerAdapter(
-    private val navigateToDetail: (data: Movie) -> Unit,
+    private val navigateToDetail: (movieId:Int) -> Unit,
     private val toggleFavorite: (movieId: String, isFavorite: Boolean) -> Unit,
 ) :
     ListAdapter<Movie, MoviesListRecyclerAdapter.UpcomingMoviesViewHolder>(MoviesDiffCallback) {
@@ -44,7 +44,7 @@ class MoviesListRecyclerAdapter(
 
         init {
             binding.mcvMovie.setOnClickListener {
-                navigateToDetail(data)
+                navigateToDetail(data.id.toInt())
             }
             binding.btnFavorite.setOnClickListener {
                 toggleFavorite(data.id, !data.isFavorite)

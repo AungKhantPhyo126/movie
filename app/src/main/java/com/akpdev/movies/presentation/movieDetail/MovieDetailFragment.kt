@@ -6,12 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.akpdev.movies.R
 import com.akpdev.movies.common.Constants
 import com.akpdev.movies.common.loadImageWithGlide
 import com.akpdev.movies.databinding.FragmentMovieDetailBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MovieDetailFragment : Fragment() {
@@ -38,17 +43,24 @@ class MovieDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.ivMoviePoster.loadImageWithGlide(Constants.BASE_IMG_URL + args.detailData.posterPath)
-        binding.movieTitle.text = args.detailData.title
-        binding.tvReview.text = args.detailData.overview
-
-        var isFavorite = args.detailData.isFavorite
-        updateFavoriteState(isFavorite)
+        viewModel.getMovieDetail(args.movieId)
+        var isFavorite = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.movieDetailState.collectLatest { result ->
+                    isFavorite = result.movieDetail?.isFavorite ?: false
+                    updateFavoriteState(isFavorite)
+                    binding.ivMoviePoster.loadImageWithGlide(Constants.BASE_IMG_URL + result.movieDetail?.posterPath)
+                    binding.movieTitle.text = result.movieDetail?.title
+                    binding.tvReview.text = result.movieDetail?.overview
+                }
+            }
+        }
 
 
         binding.btnFavorite.setOnClickListener {
             isFavorite = !isFavorite
-            viewModel.toggleFavorite(args.detailData.id, isFavorite)
+            viewModel.toggleFavorite(args.movieId.toString(), isFavorite)
             updateFavoriteState(isFavorite)
         }
     }

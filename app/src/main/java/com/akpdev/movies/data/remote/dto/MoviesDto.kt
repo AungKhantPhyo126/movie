@@ -1,4 +1,4 @@
-package com.akpdev.movies.data.dto
+package com.akpdev.movies.data.remote.dto
 
 import com.akpdev.movies.common.PaginatedList
 import com.akpdev.movies.domain.model.Movie

@@ -1,6 +1,6 @@
 package com.akpdev.movies.data.remote.api
 
-import com.akpdev.movies.data.dto.MovieResponse
+import com.akpdev.movies.data.remote.dto.MovieResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

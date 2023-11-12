@@ -17,9 +17,6 @@ interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(movies:List<MovieEntity>)
 
-    @Query("SELECT * FROM movies")
-    fun pagingSource():PagingSource<Int,MovieEntity>
-
     @Transaction
     @Query("SELECT * FROM movies where movieType=:movieType ORDER by itemOrder ASC")
     fun getMovies(movieType:String):Flow<List<MovieEntity>>
@@ -50,6 +47,10 @@ interface MovieDao {
     @Transaction
     @Query("SELECT * FROM movies where isFav=:favorite")
     fun getFavoriteMovies(favorite: Boolean = true ):List<MovieEntity>
+
+    @Transaction
+    @Query("SELECT * FROM movies where id=:id")
+    fun getMovieDetail(id:Int):MovieEntity
 
     @Query("update movies set isFav = :favorite where  id = :id")
     fun toggleFavorite(id: String, favorite: Boolean)

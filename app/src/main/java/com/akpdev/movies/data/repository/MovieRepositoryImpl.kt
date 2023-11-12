@@ -1,9 +1,8 @@
 package com.akpdev.movies.data.repository
 
-import com.akpdev.movies.common.Constants.QUERY_PAGE_SIZE
+import com.akpdev.movies.common.Constants.DEFAULT_PAGE_SIZE
 import com.akpdev.movies.common.PaginatedList
-import com.akpdev.movies.data.dto.toMovie
-import com.akpdev.movies.data.dto.toPaginatedList
+import com.akpdev.movies.data.remote.dto.toPaginatedList
 import com.akpdev.movies.data.localDataSource.dao.MovieDao
 import com.akpdev.movies.data.localDataSource.entity.PopularPagingMetaDataEntity
 import com.akpdev.movies.data.localDataSource.entity.UpcomingPagingMetaDataEntity
@@ -20,6 +19,8 @@ import java.io.IOException
 import javax.inject.Inject
 import com.akpdev.movies.domain.model.PagingMetaData
 
+
+
 class MovieRepositoryImpl @Inject constructor(
     private val moviedbApi: MoviedbApi,
     private val movieDao: MovieDao
@@ -29,9 +30,11 @@ class MovieRepositoryImpl @Inject constructor(
     ): Result<PaginatedList<Movie>> {
         return try {
             val movieList = moviedbApi.getUpcomingMovies(page).body()?.toPaginatedList(type = "upcoming")
-            movieDao.upsertAll(
-                movieList?.data?.mapIndexed { index, movie -> movie.toMovieEntity() }?.toSet()?.toList().orEmpty()
-            )
+            val movieEntityList =movieList?.data?.mapIndexed { index, movie ->
+                val order = (index+1) + (page* DEFAULT_PAGE_SIZE)
+                movie.toMovieEntity(order)
+            }.orEmpty()
+            movieDao.upsertAll(movieEntityList)
             movieDao.insertUpcomingPagingMetaData(UpcomingPagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
             Result.success(movieList ?: PaginatedList<Movie>(emptyList(), 0, 0))
         } catch (e: HttpException) {
@@ -51,10 +54,12 @@ class MovieRepositoryImpl @Inject constructor(
 
     override suspend fun getPopularMovieList(page: Int):Result<PaginatedList<Movie>> {
         return try {
-            val movieList = moviedbApi.getPopularMovies(page).body()?.toPaginatedList(type = "popular")
-            movieDao.upsertAll(
-                movieList?.data?.mapIndexed { index, movie -> movie.toMovieEntity() }?.toSet()?.toList().orEmpty()
-            )
+            val movieList = moviedbApi.getUpcomingMovies(page).body()?.toPaginatedList(type = "popular")
+            val movieEntityList =movieList?.data?.mapIndexed { index, movie ->
+                val order = (index+1) + (page* DEFAULT_PAGE_SIZE)
+                movie.toMovieEntity(order)
+            }.orEmpty()
+            movieDao.upsertAll(movieEntityList)
             movieDao.insertPopularPagingMetaData(PopularPagingMetaDataEntity(page = movieList?.page?:0 , totalPages = movieList?.totalPage?:0))
             Result.success(movieList ?: PaginatedList<Movie>(emptyList(), 0, 0))
         } catch (e: HttpException) {
@@ -86,6 +91,10 @@ class MovieRepositoryImpl @Inject constructor(
 
     override fun fetchFavoriteMoviesFromRoom(): List<Movie> {
         return movieDao.getFavoriteMovies(favorite = true).map { it.toMovie() }.distinctBy { it.id }
+    }
+
+    override fun getMovieDetail(id: Int): Movie {
+        return movieDao.getMovieDetail(id).toMovie()
     }
 
 }

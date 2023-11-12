@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.akpdev.movies.common.ConnectionObserver
 import com.akpdev.movies.common.ConnectivityLiveData
 import com.akpdev.movies.common.DefaultPaginator
-import com.akpdev.movies.domain.useCase.fetchFromNetworkUseCase.FetchUpcomingMoviesUseCase
-import com.akpdev.movies.domain.useCase.fetchFromRoom.GeUpcomingMoviesUseCase
+import com.akpdev.movies.domain.useCase.FetchUpcomingMoviesUseCase
+import com.akpdev.movies.domain.useCase.GeUpcomingMoviesUseCase
 import com.akpdev.movies.domain.useCase.GetCachedUpcomingPagingMetadataUseCase
 import com.akpdev.movies.domain.useCase.ToggleFavoriteMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

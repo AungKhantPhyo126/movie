@@ -16,4 +16,6 @@ interface MovieRepository {
     fun fetchUpcomingMoviesFromRoom():Flow<List<Movie>>
     fun fetchPopularMoviesFromRoom():Flow<List<Movie>>
     fun fetchFavoriteMoviesFromRoom():List<Movie>
+
+    fun getMovieDetail(id:Int):Movie
 }
